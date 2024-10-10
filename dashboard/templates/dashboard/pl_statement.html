@@ -1,0 +1,199 @@
+<!-- dashboard/templates/dashboard/pl_statement.html -->
+
+{% extends 'dashboard/base.html' %}
+
+{% load humanize %}
+
+{% block title %}
+    P&L Statement - EquipmentShare
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-5">Profit &amp; Loss Statement - Alabaster, AL</h1>
+    
+    <!-- Revenues Table -->
+    <h2>Revenues</h2>
+    <table class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Amount ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in revenues %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td>
+                    {% if item.category %}
+                        {{ item.category.name }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ item.amount|intcomma }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="table-success">
+                <th colspan="2">Total Revenue</th>
+                <th>${{ total_revenue|intcomma }}</th>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Expenses Table -->
+    <h2>Expenses</h2>
+    <table class="table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Amount ($)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in expenses %}
+            <tr>
+                <td>{{ item.description }}</td>
+                <td>
+                    {% if item.category %}
+                        {{ item.category.name }}
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ item.amount|intcomma }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="table-danger">
+                <th colspan="2">Total Expenses</th>
+                <th>${{ total_expense|intcomma }}</th>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Net Income: ${{ net_income|intcomma }}</h2>
+
+    <!-- Revenue and Expense Breakdown Charts -->
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <h3 class="text-center">Revenue Breakdown</h3>
+            <canvas id="revenueChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <h3 class="text-center">Expense Breakdown</h3>
+            <canvas id="expenseChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- JavaScript to Render the Charts -->
+<script>
+    // Prepare data for Revenue Chart
+    var revenueLabels = [
+        {% for item in revenues %}
+            "{{ item.description }}"{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    ];
+    var revenueData = [
+        {% for item in revenues %}
+            {{ item.amount }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    ];
+
+    // Revenue Pie Chart
+    var ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+    var revenueChart = new Chart(ctxRevenue, {
+        type: 'pie',
+        data: {
+            labels: revenueLabels,
+            datasets: [{
+                data: revenueData,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(201, 203, 207, 0.7)',
+                    'rgba(255, 205, 86, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(201, 203, 207, 1)',
+                    'rgba(255, 205, 86, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            legend: { position: 'bottom' },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var amount = data.datasets[0].data[tooltipItem.index];
+                        return data.labels[tooltipItem.index] + ': $' + amount.toLocaleString();
+                    }
+                }
+            }
+        }
+    });
+
+    // Prepare data for Expense Chart
+    var expenseLabels = [
+        {% for item in expenses %}
+            "{{ item.description }}"{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    ];
+    var expenseData = [
+        {% for item in expenses %}
+            {{ item.amount }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+    ];
+
+    // Expense Pie Chart
+    var ctxExpense = document.getElementById('expenseChart').getContext('2d');
+    var expenseChart = new Chart(ctxExpense, {
+        type: 'pie',
+        data: {
+            labels: expenseLabels,
+            datasets: [{
+                data: expenseData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(255, 205, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(54, 162, 235, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            legend: { position: 'bottom' },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var amount = data.datasets[0].data[tooltipItem.index];
+                        return data.labels[tooltipItem.index] + ': $' + amount.toLocaleString();
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

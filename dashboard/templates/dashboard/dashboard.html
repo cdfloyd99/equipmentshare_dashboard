@@ -1,0 +1,197 @@
+{% extends 'dashboard/base.html' %}
+
+{% load static %}
+{% load humanize %}
+
+{% block title %}
+    Dashboard - EquipmentShare
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-5">
+        EquipmentShare Branch Dashboard - Alabaster, AL
+    </h1>
+
+    <!-- Main Content Row -->
+    <div class="row">
+        <!-- Left Column: Asset Summary Chart -->
+        <div class="col-md-6">
+            <!-- Asset Summary -->
+            <h3 class="mb-4">Asset Summary</h3>
+            <div class="card mb-4">
+                <div class="card-body">
+                    <canvas id="assetChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Financial Summary Cards and Chart -->
+        <div class="col-md-6">
+            <!-- Financial Summary Cards -->
+            <div class="row">
+                <!-- Total Revenue Card -->
+                <div class="col-md-6">
+                    <div class="card text-white bg-success mb-4">
+                        <div class="card-header">Total Revenue</div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                ${{ total_revenue|intcomma }}
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                <!-- Total Expenses Card -->
+                <div class="col-md-6">
+                    <div class="card text-white bg-danger mb-4">
+                        <div class="card-header">Total Expenses</div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                ${{ total_expense|intcomma }}
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                <!-- Net Income Card -->
+                <div class="col-md-6">
+                    <div class="card text-white bg-info mb-4">
+                        <div class="card-header">Net Income</div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                ${{ net_income|intcomma }}
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                <!-- Profit Margin Card -->
+                <div class="col-md-6">
+                    <div class="card text-white bg-warning mb-4">
+                        <div class="card-header">Profit Margin</div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                {{ profit_margin|floatformat:2 }}%
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                <!-- EPS Card -->
+                <div class="col-md-12">
+                    <div class="card text-white bg-primary mb-4 eps-card">
+                        <div class="card-header">Earnings Per Share (EPS)</div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                ${{ earnings_per_share|floatformat:2 }}
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Revenue vs. Expenses Chart -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <canvas id="revenueExpenseChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- JavaScript to Render the Charts -->
+<script>
+    // Parse JSON data passed from the view
+    var assetTypes = JSON.parse('{{ asset_types_json|escapejs }}');
+    var assetValues = JSON.parse('{{ asset_values_json|escapejs }}');
+    var revenueExpenseData = JSON.parse('{{ revenue_expense_data|escapejs }}');
+
+    // Asset Chart
+    var ctxAsset = document.getElementById('assetChart').getContext('2d');
+    var assetChart = new Chart(ctxAsset, {
+        type: 'doughnut',
+        data: {
+            labels: assetTypes,
+            datasets: [{
+                data: assetValues,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(255, 159, 64, 0.7)',
+                    'rgba(153, 102, 255, 0.7)',
+                    'rgba(255, 205, 86, 0.7)',
+                    'rgba(54, 162, 235, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(54, 162, 235, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            legend: { position: 'bottom' },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        var amount = data.datasets[0].data[tooltipItem.index];
+                        return data.labels[tooltipItem.index] + ': $' + parseFloat(amount).toLocaleString();
+                    }
+                }
+            }
+        }
+    });
+
+    // Revenue vs. Expenses Chart
+    var ctxRevExp = document.getElementById('revenueExpenseChart').getContext('2d');
+    var revenueExpenseChart = new Chart(ctxRevExp, {
+        type: 'bar',
+        data: {
+            labels: ['Total Revenue', 'Total Expenses', 'Net Income'],
+            datasets: [{
+                label: 'Amount in $',
+                data: [
+                    revenueExpenseData.total_revenue,
+                    revenueExpenseData.total_expense,
+                    revenueExpenseData.net_income
+                ],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',   // Green
+                    'rgba(220, 53, 69, 0.7)',   // Red
+                    'rgba(23, 162, 184, 0.7)'   // Cyan
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(220, 53, 69, 1)',
+                    'rgba(23, 162, 184, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function(value, index, values) {
+                            return '$' + parseFloat(value).toLocaleString();
+                        }
+                    }
+                }]
+            },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        return '$' + parseFloat(tooltipItem.yLabel).toLocaleString();
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
