@@ -1,0 +1,37 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment folder
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Django specific files
+db.sqlite3  # This is the SQLite database file (should not be in the repository)
+*.log       # Log files
+media/      # User-uploaded files (if you have media files)
+staticfiles/ # Generated static files
+
+# Local environment settings
+*.env       # Environment variables file (if you're using a .env file for secrets)
+secret_key.txt  # If you're storing sensitive data like secret keys
+
+# IDE / Editor specific
+.idea/         # PyCharm
+.vscode/       # Visual Studio Code
+*.sublime-workspace
+*.sublime-project
+
+# OS-specific files
+.DS_Store      # macOS
+Thumbs.db      # Windows
+
+# Python egg files
+*.egg
+*.egg-info/
+dist/
+build/
