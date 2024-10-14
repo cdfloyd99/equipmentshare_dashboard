@@ -92,26 +92,14 @@
 
 <!-- JavaScript to Render the Charts -->
 <script>
-    // Prepare data for Revenue Chart
-    var revenueLabels = [
-        {% for item in revenues %}
-            "{{ item.description }}"{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-    ];
-    var revenueData = [
-        {% for item in revenues %}
-            {{ item.amount }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-    ];
-
-    // Revenue Pie Chart
+    // Revenue Pie Chart (grouped by category)
     var ctxRevenue = document.getElementById('revenueChart').getContext('2d');
     var revenueChart = new Chart(ctxRevenue, {
         type: 'pie',
         data: {
-            labels: revenueLabels,
+            labels: JSON.parse('{{ revenue_categories|escapejs }}'),  // Use categories as labels
             datasets: [{
-                data: revenueData,
+                data: JSON.parse('{{ revenue_totals|escapejs }}'),  // Use total amounts by category
                 backgroundColor: [
                     'rgba(75, 192, 192, 0.7)',
                     'rgba(54, 162, 235, 0.7)',
@@ -143,26 +131,14 @@
         }
     });
 
-    // Prepare data for Expense Chart
-    var expenseLabels = [
-        {% for item in expenses %}
-            "{{ item.description }}"{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-    ];
-    var expenseData = [
-        {% for item in expenses %}
-            {{ item.amount }}{% if not forloop.last %}, {% endif %}
-        {% endfor %}
-    ];
-
-    // Expense Pie Chart
+    // Expense Pie Chart (grouped by category)
     var ctxExpense = document.getElementById('expenseChart').getContext('2d');
     var expenseChart = new Chart(ctxExpense, {
         type: 'pie',
         data: {
-            labels: expenseLabels,
+            labels: JSON.parse('{{ expense_categories|escapejs }}'),  // Use categories as labels
             datasets: [{
-                data: expenseData,
+                data: JSON.parse('{{ expense_totals|escapejs }}'),  // Use total amounts by category
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.7)',
                     'rgba(255, 159, 64, 0.7)',

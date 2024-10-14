@@ -1,6 +1,7 @@
 import json
 from django.shortcuts import render, get_object_or_404
 from .models import Revenue, Expense, Asset, CompanyInfo, Branch
+from django.db.models import Sum
 
 def dashboard_view(request):
     # Get the selected branch from the request parameters (default to Alabaster)
@@ -29,6 +30,19 @@ def dashboard_view(request):
     shares_outstanding = company_info.shares_outstanding if company_info else 0
     earnings_per_share = net_income / shares_outstanding if shares_outstanding > 0 else 0
 
+    # Revenue by category for the pie chart
+    revenue_breakdown = Revenue.objects.filter(branch=branch).values('category__name').annotate(total_amount=Sum('amount')).order_by('category__name')
+
+    # Expenses by category for the pie chart
+    expense_breakdown = Expense.objects.filter(branch=branch).values('category__name').annotate(total_amount=Sum('amount')).order_by('category__name')
+
+    # Prepare data for template
+    revenue_categories = [item['category__name'] for item in revenue_breakdown]
+    revenue_totals = [item['total_amount'] for item in revenue_breakdown]
+
+    expense_categories = [item['category__name'] for item in expense_breakdown]
+    expense_totals = [item['total_amount'] for item in expense_breakdown]
+
     # Serialize data to JSON for Chart.js
     asset_types_json = json.dumps(asset_types)
     asset_values_json = json.dumps(asset_values)
@@ -56,6 +70,11 @@ def dashboard_view(request):
         'asset_values_json': asset_values_json,
         # EPS
         'earnings_per_share': earnings_per_share,
+        # Revenue and Expense Breakdown Data
+        'revenue_categories': json.dumps(revenue_categories),
+        'revenue_totals': json.dumps([float(v) for v in revenue_totals]),
+        'expense_categories': json.dumps(expense_categories),
+        'expense_totals': json.dumps([float(v) for v in expense_totals]),
         # Revenue and Expense Data
         'revenue_expense_data': revenue_expense_data,
     }
@@ -78,6 +97,19 @@ def pl_statement_view(request):
     total_expense = sum(float(item.amount) for item in expenses)
     net_income = total_revenue - total_expense
 
+    # Revenue by category for the pie chart
+    revenue_breakdown = Revenue.objects.filter(branch=branch).values('category__name').annotate(total_amount=Sum('amount')).order_by('category__name')
+
+    # Expenses by category for the pie chart
+    expense_breakdown = Expense.objects.filter(branch=branch).values('category__name').annotate(total_amount=Sum('amount')).order_by('category__name')
+
+    # Prepare data for template
+    revenue_categories = [item['category__name'] for item in revenue_breakdown]
+    revenue_totals = [item['total_amount'] for item in revenue_breakdown]
+
+    expense_categories = [item['category__name'] for item in expense_breakdown]
+    expense_totals = [item['total_amount'] for item in expense_breakdown]
+
     context = {
         'selected_branch': selected_branch_name,
         'branch_name': branch.name,
@@ -87,5 +119,10 @@ def pl_statement_view(request):
         'total_revenue': total_revenue,
         'total_expense': total_expense,
         'net_income': net_income,
+        # Pass categories and totals for charts
+        'revenue_categories': json.dumps(revenue_categories),
+        'revenue_totals': json.dumps([float(v) for v in revenue_totals]),
+        'expense_categories': json.dumps(expense_categories),
+        'expense_totals': json.dumps([float(v) for v in expense_totals]),
     }
     return render(request, 'dashboard/pl_statement.html', context)
