@@ -6,16 +6,10 @@
     <meta charset="UTF-8">
     <title>{% block title %}EquipmentShare{% endblock %}</title>
     <!-- Include Bootstrap CSS -->
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Include Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap"
-    />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
@@ -25,21 +19,31 @@
         <a class="navbar-brand" href="{% url 'dashboard' %}">
             <img src="{% static 'images/equipmentshare_logo.png' %}" alt="EquipmentShare Logo">
         </a>
-        <span class="navbar-text text-white ml-2">
-            Alabaster, AL
-        </span>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
-          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
+
+        <!-- Branch Selector Dropdown -->
+        <form method="get" action="{% url 'dashboard' %}" class="form-inline ml-2">
+            <label class="text-white mr-2">Branch:</label>
+            <select name="branch" class="form-control" onchange="this.form.submit()">
+                {% for branch in all_branches %}
+                    <option value="{{ branch.name|lower }}" {% if selected_branch == branch.name|lower %}selected{% endif %}>
+                        {{ branch.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
+
         <!-- Navigation Links -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item{% if request.path == '/' %} active{% endif %}">
-                    <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                    <a class="nav-link" href="{% url 'dashboard' %}?branch={{ selected_branch }}">Dashboard</a>
                 </li>
                 <li class="nav-item{% if request.path == '/pl-statement/' %} active{% endif %}">
-                    <a class="nav-link" href="{% url 'pl_statement' %}">P&L Statement</a>
+                    <a class="nav-link" href="{% url 'pl_statement' %}?branch={{ selected_branch }}">P&L Statement</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/admin/">Admin</a>
@@ -47,20 +51,16 @@
             </ul>
         </div>
     </nav>
-    
+
     {% block content %}
     {% endblock %}
-    
+
     {% block extra_scripts %}
     {% endblock %}
-    
+
     <!-- Include Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-    ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,16 +1,14 @@
-<!-- dashboard/templates/dashboard/pl_statement.html -->
-
 {% extends 'dashboard/base.html' %}
 
 {% load humanize %}
 
 {% block title %}
-    P&L Statement - EquipmentShare
+    P&L Statement - {{ branch_name }}
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center mb-5">Profit &amp; Loss Statement - Alabaster, AL</h1>
+    <h1 class="text-center mb-5">Profit &amp; Loss Statement - {{ branch_name }}</h1>
     
     <!-- Revenues Table -->
     <h2>Revenues</h2>

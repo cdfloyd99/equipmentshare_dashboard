@@ -6,9 +6,10 @@ body {
 }
 
 h1 {
+    font-family: 'Montserrat', sans-serif;
     font-weight: 700;
-    font-size: 2.5rem;
-    color: #343a40; /* Dark grey */
+    font-size: 2rem;
+    color: #343a40;
 }
 
 h3 {
@@ -19,6 +20,11 @@ h3 {
 .card {
     border-radius: 0.75rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
 }
 
 .card-header {
@@ -63,3 +69,7 @@ h3 {
     transition: transform 0.2s;
 }
 
+.form-control {
+    width: auto;
+    display: inline-block;
+}

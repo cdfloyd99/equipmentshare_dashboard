@@ -1,20 +1,26 @@
-# dashboard/views.py
-
 import json
-from django.shortcuts import render
-from .models import Revenue, Expense, Asset, CompanyInfo
+from django.shortcuts import render, get_object_or_404
+from .models import Revenue, Expense, Asset, CompanyInfo, Branch
 
 def dashboard_view(request):
-    # Financial Summary
-    total_revenue = sum(float(item.amount) for item in Revenue.objects.all())
-    total_expense = sum(float(item.amount) for item in Expense.objects.all())
+    # Get the selected branch from the request parameters (default to Alabaster)
+    selected_branch = request.GET.get('branch', 'alabaster')
+
+    # Fetch the Branch object (make sure it exists in your database)
+    branch = get_object_or_404(Branch, name__iexact=selected_branch.capitalize())
+
+    # Get all branches for the dropdown menu
+    all_branches = Branch.objects.all()
+
+    # Financial Summary from Models
+    total_revenue = sum(float(item.amount) for item in Revenue.objects.filter(branch=branch))
+    total_expense = sum(float(item.amount) for item in Expense.objects.filter(branch=branch))
     net_income = total_revenue - total_expense
     profit_margin = (net_income / total_revenue) * 100 if total_revenue > 0 else 0
 
     # Asset Summary
     assets = Asset.objects.all()
     total_asset_value = sum(float(asset.value) for asset in assets)
-
     asset_types = [asset.type for asset in assets]
     asset_values = [float(asset.value) for asset in assets]
 
@@ -23,11 +29,11 @@ def dashboard_view(request):
     shares_outstanding = company_info.shares_outstanding if company_info else 0
     earnings_per_share = net_income / shares_outstanding if shares_outstanding > 0 else 0
 
-    # Serialize data to JSON strings
+    # Serialize data to JSON for Chart.js
     asset_types_json = json.dumps(asset_types)
     asset_values_json = json.dumps(asset_values)
 
-    # Serialize financial data for charts
+    # Financial data for charts
     revenue_expense_data = json.dumps({
         'total_revenue': total_revenue,
         'total_expense': total_expense,
@@ -35,6 +41,10 @@ def dashboard_view(request):
     })
 
     context = {
+        # Branch-specific data
+        'selected_branch': selected_branch,
+        'branch_name': branch.name,
+        'all_branches': all_branches,  # Pass all branches to the template
         # Financial Summary
         'total_revenue': total_revenue,
         'total_expense': total_expense,
@@ -52,13 +62,26 @@ def dashboard_view(request):
     return render(request, 'dashboard/dashboard.html', context)
 
 def pl_statement_view(request):
-    revenues = Revenue.objects.all()
-    expenses = Expense.objects.all()
+    # Get the selected branch from the request parameters (default to Alabaster)
+    selected_branch_name = request.GET.get('branch', 'alabaster')
+
+    # Fetch the Branch object based on the selected name (case-sensitive)
+    branch = get_object_or_404(Branch, name__iexact=selected_branch_name.capitalize())
+
+    # Get all branches for the dropdown menu
+    all_branches = Branch.objects.all()
+
+    # Load Revenue and Expenses for P&L statement based on the branch
+    revenues = Revenue.objects.filter(branch=branch)
+    expenses = Expense.objects.filter(branch=branch)
     total_revenue = sum(float(item.amount) for item in revenues)
     total_expense = sum(float(item.amount) for item in expenses)
     net_income = total_revenue - total_expense
 
     context = {
+        'selected_branch': selected_branch_name,
+        'branch_name': branch.name,
+        'all_branches': all_branches,  # Pass all branches to the template
         'revenues': revenues,
         'expenses': expenses,
         'total_revenue': total_revenue,
@@ -66,4 +89,3 @@ def pl_statement_view(request):
         'net_income': net_income,
     }
     return render(request, 'dashboard/pl_statement.html', context)
-
