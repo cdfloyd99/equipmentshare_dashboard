@@ -2,6 +2,8 @@ import json
 from django.shortcuts import render, get_object_or_404
 from .models import Revenue, Expense, Asset, CompanyInfo, Branch
 from django.db.models import Sum
+import openpyxl
+from django.http import HttpResponse
 
 def dashboard_view(request):
     # Get the selected branch from the request parameters (default to Alabaster)
@@ -126,3 +128,52 @@ def pl_statement_view(request):
         'expense_totals': json.dumps([float(v) for v in expense_totals]),
     }
     return render(request, 'dashboard/pl_statement.html', context)
+
+def export_pl_to_excel(request, branch_name):
+    # Get the selected branch object
+    branch = get_object_or_404(Branch, name__iexact=branch_name.capitalize())
+
+    # Load Revenue and Expenses for the selected branch
+    revenues = Revenue.objects.filter(branch=branch)
+    expenses = Expense.objects.filter(branch=branch)
+
+    # Create an Excel workbook and add a worksheet
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = f"P&L Statement - {branch_name}"
+
+    # Write the header row for revenues
+    sheet.append(["Revenues"])
+    sheet.append(["Description", "Category", "Amount ($)"])
+    for revenue in revenues:
+        sheet.append([revenue.description, revenue.category.name if revenue.category else "N/A", float(revenue.amount)])
+
+    # Write the total revenue row
+    total_revenue = sum(float(item.amount) for item in revenues)
+    sheet.append(["", "Total Revenue", total_revenue])
+
+    # Leave an empty row before expenses
+    sheet.append([])
+
+    # Write the header row for expenses
+    sheet.append(["Expenses"])
+    sheet.append(["Description", "Category", "Amount ($)"])
+    for expense in expenses:
+        sheet.append([expense.description, expense.category.name if expense.category else "N/A", float(expense.amount)])
+
+    # Write the total expenses row
+    total_expense = sum(float(item.amount) for item in expenses)
+    sheet.append(["", "Total Expenses", total_expense])
+
+    # Write the net income
+    net_income = total_revenue - total_expense
+    sheet.append(["", "Net Income", net_income])
+
+    # Prepare the HTTP response with the Excel file
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="PL_Statement_{branch_name}.xlsx"'
+
+    # Save the workbook to the response
+    workbook.save(response)
+
+    return response

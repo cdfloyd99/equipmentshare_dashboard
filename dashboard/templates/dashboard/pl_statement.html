@@ -9,6 +9,13 @@
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-5">Profit &amp; Loss Statement - {{ branch_name }}</h1>
+
+    <!-- Export to Excel Button -->
+    <div class="text-right mb-3">
+        <a href="{% url 'export_pl_to_excel' branch_name %}" class="btn btn-success">
+            Export to Excel
+        </a>
+    </div>
     
     <!-- Revenues Table -->
     <h2>Revenues</h2>
