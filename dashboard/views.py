@@ -4,6 +4,9 @@ from .models import Revenue, Expense, Asset, CompanyInfo, Branch
 from django.db.models import Sum
 import openpyxl
 from django.http import HttpResponse
+from django.template.loader import get_template
+from weasyprint import HTML
+import tempfile
 
 def dashboard_view(request):
     # Get the selected branch from the request parameters (default to Alabaster)
@@ -175,5 +178,41 @@ def export_pl_to_excel(request, branch_name):
 
     # Save the workbook to the response
     workbook.save(response)
+
+    return response
+
+def export_dashboard_pdf(request, branch_name):
+    # Get the selected branch
+    branch = get_object_or_404(Branch, name__iexact=branch_name.capitalize())
+
+    # Fetch revenues and expenses for the branch
+    revenues = Revenue.objects.filter(branch=branch)
+    expenses = Expense.objects.filter(branch=branch)
+
+    # Calculate totals
+    total_revenue = sum(float(item.amount) for item in revenues)
+    total_expense = sum(float(item.amount) for item in expenses)
+    net_income = total_revenue - total_expense
+
+    # Prepare context data for rendering the PDF
+    context = {
+        'branch_name': branch.name,
+        'revenues': revenues,
+        'expenses': expenses,
+        'total_revenue': total_revenue,
+        'total_expense': total_expense,
+        'net_income': net_income,
+    }
+
+    # Load the HTML template for the dashboard/P&L statement
+    template = get_template('dashboard/pdf_template.html')
+    html = template.render(context)
+
+    # Create a PDF response
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Dashboard_P&L_{branch_name}.pdf"'
+
+    # Convert the HTML to a PDF
+    HTML(string=html).write_pdf(response)
 
     return response

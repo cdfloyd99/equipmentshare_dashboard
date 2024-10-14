@@ -13,6 +13,13 @@
         EquipmentShare Branch Dashboard - {{ branch_name }}
     </h1>
 
+    <!-- Export Button (placed top right) -->
+    <div class="text-right mb-4">
+        <a href="{% url 'export_dashboard_pdf' branch_name %}" class="btn btn-danger">
+            Export Summary to PDF
+        </a>
+    </div>
+
     <!-- Main Content Row -->
     <div class="row">
         <!-- Left Column: Asset Summary Chart -->
@@ -80,7 +87,7 @@
                         <div class="card-header">Earnings Per Share (EPS)</div>
                         <div class="card-body">
                             <h5 class="card-title">
-                                ${{ earnings_per_share|floatformat:2|intcomma }}
+                                ${{ earnings_per_share|floatformat:2 }}
                             </h5>
                         </div>
                     </div>
