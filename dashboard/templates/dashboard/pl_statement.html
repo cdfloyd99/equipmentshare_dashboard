@@ -36,7 +36,7 @@
             {% endfor %}
             <tr class="table-success">
                 <th colspan="2">Total Revenue</th>
-                <th>${{ total_revenue|intcomma }}</th>
+                <th>${{ total_revenue|floatformat:2|intcomma }}</th>
             </tr>
         </tbody>
     </table>
@@ -67,12 +67,12 @@
             {% endfor %}
             <tr class="table-danger">
                 <th colspan="2">Total Expenses</th>
-                <th>${{ total_expense|intcomma }}</th>
+                <th>${{ total_expense|floatformat:2|intcomma }}</th>
             </tr>
         </tbody>
     </table>
 
-    <h2>Net Income: ${{ net_income|intcomma }}</h2>
+    <h2>Net Income: ${{ net_income|floatformat:2|intcomma }}</h2>
 
     <!-- Revenue and Expense Breakdown Charts -->
     <div class="row mt-5">

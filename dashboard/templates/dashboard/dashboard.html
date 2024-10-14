@@ -36,7 +36,7 @@
                         <div class="card-header">Total Revenue</div>
                         <div class="card-body">
                             <h5 class="card-title">
-                                ${{ total_revenue|intcomma }}
+                                ${{ total_revenue|floatformat:2|intcomma }}
                             </h5>
                         </div>
                     </div>
@@ -47,7 +47,7 @@
                         <div class="card-header">Total Expenses</div>
                         <div class="card-body">
                             <h5 class="card-title">
-                                ${{ total_expense|intcomma }}
+                                ${{ total_expense|floatformat:2|intcomma }}
                             </h5>
                         </div>
                     </div>
@@ -58,7 +58,7 @@
                         <div class="card-header">Net Income</div>
                         <div class="card-body">
                             <h5 class="card-title">
-                                ${{ net_income|intcomma }}
+                                ${{ net_income|floatformat:2|intcomma }}
                             </h5>
                         </div>
                     </div>
@@ -80,7 +80,7 @@
                         <div class="card-header">Earnings Per Share (EPS)</div>
                         <div class="card-body">
                             <h5 class="card-title">
-                                ${{ earnings_per_share|floatformat:2 }}
+                                ${{ earnings_per_share|floatformat:2|intcomma }}
                             </h5>
                         </div>
                     </div>
