@@ -103,6 +103,19 @@ def pl_statement_view(request):
     total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
     net_income = total_revenue - total_expense
 
+    # Revenue by category for the pie chart
+    revenue_breakdown = revenues.values('category__name').annotate(total_amount=Sum('amount')).order_by('category__name')
+    
+    # Expenses by category for the pie chart
+    expense_breakdown = expenses.values('category__name').annotate(total_amount=Sum('amount')).order_by('category__name')
+
+    # Prepare data for charts
+    revenue_categories = [item['category__name'] for item in revenue_breakdown]
+    revenue_totals = [float(item['total_amount']) for item in revenue_breakdown]  # Convert to float
+    
+    expense_categories = [item['category__name'] for item in expense_breakdown]
+    expense_totals = [float(item['total_amount']) for item in expense_breakdown]  # Convert to float
+
     context = {
         'selected_branch': selected_branch,
         'branch_name': branch.name,
@@ -115,7 +128,11 @@ def pl_statement_view(request):
         'selected_month': selected_month,
         'selected_year': selected_year,
         'months': months,  # Pass months to template
-        'years': years,    # Pass years to template
+        'years': years,    # Pass years to template,
+        'revenue_categories': json.dumps(revenue_categories),
+        'revenue_totals': json.dumps(revenue_totals),  # Already converted to float
+        'expense_categories': json.dumps(expense_categories),
+        'expense_totals': json.dumps(expense_totals),  # Already converted to float
     }
     return render(request, 'dashboard/pl_statement.html', context)
 
@@ -137,12 +154,8 @@ def export_pl_to_excel(request, branch_name):
     sheet = workbook.active
 
     # Ensure the sheet title is within 31 characters and doesn't contain invalid characters
-    safe_sheet_title = f"P&L_{branch_name}_{selected_month}-{selected_year}"[:31]
+    safe_sheet_title = f"PL_{branch_name}_{selected_month}_{selected_year}"[:31]
     sheet.title = safe_sheet_title
-
-    # Set workbook properties to avoid repair warnings
-    workbook.properties.creator = "EquipmentShare Dashboard"
-    workbook.properties.created = timezone.now()
 
     # Write the header row for revenues
     sheet.append(["Revenues"])

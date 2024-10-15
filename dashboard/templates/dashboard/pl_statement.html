@@ -131,7 +131,7 @@
                 callbacks: {
                     label: function(tooltipItem, data) {
                         var amount = data.datasets[0].data[tooltipItem.index];
-                        return data.labels[tooltipItem.index] + ': $' + amount.toLocaleString();
+                        return data.labels[tooltipItem.index] + ': $' + parseFloat(amount).toLocaleString();
                     }
                 }
             }
@@ -170,7 +170,7 @@
                 callbacks: {
                     label: function(tooltipItem, data) {
                         var amount = data.datasets[0].data[tooltipItem.index];
-                        return data.labels[tooltipItem.index] + ': $' + amount.toLocaleString();
+                        return data.labels[tooltipItem.index] + ': $' + parseFloat(amount).toLocaleString();
                     }
                 }
             }
