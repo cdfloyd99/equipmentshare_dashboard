@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 class RevenueCategory(models.Model):
     name = models.CharField(max_length=255)
@@ -23,7 +24,8 @@ class Revenue(models.Model):
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey('RevenueCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, null=True)  # Allow null temporarily
+    branch = models.ForeignKey('Branch', on_delete=models.CASCADE, null=True)
+    date = models.DateField(default=timezone.now)  # Add the new date field
 
     def __str__(self):
         return self.description
@@ -32,7 +34,8 @@ class Expense(models.Model):
     description = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey('ExpenseCategory', on_delete=models.SET_NULL, null=True, blank=True)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, null=True)  # Allow null temporarily
+    branch = models.ForeignKey('Branch', on_delete=models.CASCADE, null=True)
+    date = models.DateField(default=timezone.now)  # Add the new date field
 
     def __str__(self):
         return self.description

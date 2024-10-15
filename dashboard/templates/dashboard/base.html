@@ -30,6 +30,34 @@
                     </option>
                 {% endfor %}
             </select>
+            <!-- Hidden inputs to retain the month and year when changing branch -->
+            <input type="hidden" name="month" value="{{ selected_month }}">
+            <input type="hidden" name="year" value="{{ selected_year }}">
+        </form>
+
+        <!-- Month/Year Selector -->
+        <form method="get" action="{% url 'dashboard' %}" class="form-inline ml-2">
+            <label class="text-white ml-4 mr-2">Month/Year:</label>
+
+            <!-- Month Selector -->
+            <select name="month" class="form-control" onchange="this.form.submit()">
+                {% for month_num, month_name in months %}
+                    <option value="{{ month_num }}" {% if month_num == selected_month %}selected{% endif %}>
+                        {{ month_name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <!-- Year Selector -->
+            <select name="year" class="form-control ml-2" onchange="this.form.submit()">
+                {% for year in years %}
+                    <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+                        {{ year }}
+                    </option>
+                {% endfor %}
+            </select>
+            <!-- Hidden input to retain the branch when changing month/year -->
+            <input type="hidden" name="branch" value="{{ selected_branch }}">
         </form>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,10 +68,10 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item{% if request.path == '/' %} active{% endif %}">
-                    <a class="nav-link" href="{% url 'dashboard' %}?branch={{ selected_branch }}">Dashboard</a>
+                    <a class="nav-link" href="{% url 'dashboard' %}?branch={{ selected_branch }}&month={{ selected_month }}&year={{ selected_year }}">Dashboard</a>
                 </li>
                 <li class="nav-item{% if request.path == '/pl-statement/' %} active{% endif %}">
-                    <a class="nav-link" href="{% url 'pl_statement' %}?branch={{ selected_branch }}">P&L Statement</a>
+                    <a class="nav-link" href="{% url 'pl_statement' %}?branch={{ selected_branch }}&month={{ selected_month }}&year={{ selected_year }}">P&L Statement</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/admin/">Admin</a>

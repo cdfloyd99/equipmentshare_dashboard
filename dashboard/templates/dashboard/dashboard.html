@@ -4,13 +4,13 @@
 {% load humanize %}
 
 {% block title %}
-    Dashboard - {{ branch_name }}
+    Dashboard - {{ branch_name }} ({{ selected_month }}/{{ selected_year }})
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center mb-5">
-        EquipmentShare Branch Dashboard - {{ branch_name }}
+        EquipmentShare Branch Dashboard - {{ branch_name }} ({{ selected_month }}/{{ selected_year }})
     </h1>
 
     <!-- Export Button (placed top right) -->

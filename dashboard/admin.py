@@ -28,16 +28,12 @@ class BranchAdmin(admin.ModelAdmin):
 # Custom Admin for Revenue
 @admin.register(Revenue)
 class RevenueAdmin(admin.ModelAdmin):
-    list_display = ('description', 'amount', 'branch', 'category')
-    list_filter = ('branch', 'category')
-    search_fields = ('description',)
+    list_display = ['description', 'amount', 'category', 'branch', 'date']  # Show the date field in the list view
 
 # Custom Admin for Expense
 @admin.register(Expense)
 class ExpenseAdmin(admin.ModelAdmin):
-    list_display = ('description', 'amount', 'branch', 'category')
-    list_filter = ('branch', 'category')
-    search_fields = ('description',)
+    list_display = ['description', 'amount', 'category', 'branch', 'date']
 
 # Admin for RevenueCategory and ExpenseCategory
 @admin.register(RevenueCategory)
