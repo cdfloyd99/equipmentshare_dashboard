@@ -15,7 +15,7 @@
 
     <!-- Export Button (placed top right) -->
     <div class="text-right mb-4">
-        <a href="{% url 'export_dashboard_pdf' branch_name %}" class="btn btn-danger">
+        <a href="{% url 'export_dashboard_pdf' branch_name %}?month={{ selected_month }}&year={{ selected_year }}" class="btn btn-danger">
             Export Summary to PDF
         </a>
     </div>
@@ -112,7 +112,10 @@
     // Parse JSON data passed from the view
     var assetTypes = JSON.parse('{{ asset_types_json|escapejs }}');
     var assetValues = JSON.parse('{{ asset_values_json|escapejs }}');
-    var revenueExpenseData = JSON.parse('{{ revenue_expense_data|escapejs }}');
+    var revenueCategories = JSON.parse('{{ revenue_categories|escapejs }}');
+    var revenueTotals = JSON.parse('{{ revenue_totals|escapejs }}');
+    var expenseCategories = JSON.parse('{{ expense_categories|escapejs }}');
+    var expenseTotals = JSON.parse('{{ expense_totals|escapejs }}');
 
     // Asset Chart
     var ctxAsset = document.getElementById('assetChart').getContext('2d');
@@ -162,9 +165,9 @@
             datasets: [{
                 label: 'Amount in $',
                 data: [
-                    revenueExpenseData.total_revenue,
-                    revenueExpenseData.total_expense,
-                    revenueExpenseData.net_income
+                    {{ total_revenue }},
+                    {{ total_expense }},
+                    {{ net_income }}
                 ],
                 backgroundColor: [
                     'rgba(40, 167, 69, 0.7)',   // Green

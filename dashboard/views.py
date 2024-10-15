@@ -50,6 +50,17 @@ def dashboard_view(request):
     shares_outstanding = company_info.shares_outstanding if company_info else 0
     earnings_per_share = net_income / shares_outstanding if shares_outstanding > 0 else 0
 
+    # Revenue by category for the pie chart
+    revenue_breakdown = revenues.values('category__name').annotate(total_amount=Sum('amount')).order_by('category__name')
+    expense_breakdown = expenses.values('category__name').annotate(total_amount=Sum('amount')).order_by('category__name')
+
+    # Prepare data for charts
+    revenue_categories = [item['category__name'] for item in revenue_breakdown]
+    revenue_totals = [item['total_amount'] for item in revenue_breakdown]
+
+    expense_categories = [item['category__name'] for item in expense_breakdown]
+    expense_totals = [item['total_amount'] for item in expense_breakdown]
+
     # Prepare context data
     context = {
         'selected_branch': selected_branch,
@@ -62,6 +73,10 @@ def dashboard_view(request):
         'earnings_per_share': earnings_per_share,
         'asset_types_json': json.dumps(asset_types),
         'asset_values_json': json.dumps(asset_values),
+        'revenue_categories': json.dumps(revenue_categories),
+        'revenue_totals': json.dumps([float(v) for v in revenue_totals]),
+        'expense_categories': json.dumps(expense_categories),
+        'expense_totals': json.dumps([float(v) for v in expense_totals]),
         'selected_month': selected_month,
         'selected_year': selected_year,
         'months': months,  # Pass months to template
@@ -156,12 +171,16 @@ def export_pl_to_excel(request, branch_name):
 
 # Export Dashboard to PDF
 def export_dashboard_pdf(request, branch_name):
+    # Get selected month/year from the request
+    selected_month = int(request.GET.get('month', timezone.now().month))
+    selected_year = int(request.GET.get('year', timezone.now().year))
+
     # Get the selected branch
     branch = get_object_or_404(Branch, name__iexact=branch_name.capitalize())
 
-    # Fetch revenues and expenses for the branch
-    revenues = Revenue.objects.filter(branch=branch)
-    expenses = Expense.objects.filter(branch=branch)
+    # Fetch revenues and expenses for the branch, filtered by month/year
+    revenues = Revenue.objects.filter(branch=branch, date__month=selected_month, date__year=selected_year)
+    expenses = Expense.objects.filter(branch=branch, date__month=selected_month, date__year=selected_year)
 
     # Calculate totals
     total_revenue = sum(float(item.amount) for item in revenues)
@@ -176,6 +195,8 @@ def export_dashboard_pdf(request, branch_name):
         'total_revenue': total_revenue,
         'total_expense': total_expense,
         'net_income': net_income,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
     }
 
     # Load the HTML template for the dashboard/P&L statement
@@ -184,7 +205,7 @@ def export_dashboard_pdf(request, branch_name):
 
     # Create a PDF response
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Dashboard_P&L_{branch_name}.pdf"'
+    response['Content-Disposition'] = f'attachment; filename="Dashboard_P&L_{branch_name}_{selected_month}_{selected_year}.pdf"'
 
     # Convert the HTML to a PDF
     HTML(string=html).write_pdf(response)
