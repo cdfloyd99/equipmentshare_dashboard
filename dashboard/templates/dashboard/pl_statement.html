@@ -12,7 +12,7 @@
 
     <!-- Export to Excel Button -->
     <div class="text-right mb-3">
-        <a href="{% url 'export_pl_to_excel' branch_name %}" class="btn btn-success">
+        <a href="{% url 'export_pl_to_excel' branch_name %}?month={{ selected_month }}&year={{ selected_year }}" class="btn btn-success">
             Export to Excel
         </a>
     </div>

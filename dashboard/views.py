@@ -124,14 +124,25 @@ def export_pl_to_excel(request, branch_name):
     # Get the selected branch object
     branch = get_object_or_404(Branch, name__iexact=branch_name.capitalize())
 
-    # Load Revenue and Expenses for the selected branch
-    revenues = Revenue.objects.filter(branch=branch)
-    expenses = Expense.objects.filter(branch=branch)
+    # Get selected month and year from request parameters (default to current month/year)
+    selected_month = int(request.GET.get('month', timezone.now().month))
+    selected_year = int(request.GET.get('year', timezone.now().year))
+
+    # Load Revenue and Expenses for the selected branch and time range
+    revenues = Revenue.objects.filter(branch=branch, date__month=selected_month, date__year=selected_year)
+    expenses = Expense.objects.filter(branch=branch, date__month=selected_month, date__year=selected_year)
 
     # Create an Excel workbook and add a worksheet
     workbook = openpyxl.Workbook()
     sheet = workbook.active
-    sheet.title = f"P&L Statement - {branch_name}"
+
+    # Ensure the sheet title is within 31 characters and doesn't contain invalid characters
+    safe_sheet_title = f"P&L_{branch_name}_{selected_month}-{selected_year}"[:31]
+    sheet.title = safe_sheet_title
+
+    # Set workbook properties to avoid repair warnings
+    workbook.properties.creator = "EquipmentShare Dashboard"
+    workbook.properties.created = timezone.now()
 
     # Write the header row for revenues
     sheet.append(["Revenues"])
@@ -162,7 +173,7 @@ def export_pl_to_excel(request, branch_name):
 
     # Prepare the HTTP response with the Excel file
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename="PL_Statement_{branch_name}.xlsx"'
+    response['Content-Disposition'] = f'attachment; filename="PL_Statement_{branch_name}_{selected_month}_{selected_year}.xlsx"'
 
     # Save the workbook to the response
     workbook.save(response)
